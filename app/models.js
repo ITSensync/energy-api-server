@@ -238,7 +238,7 @@ const Machine = sequelize.define('Machine', {
   groupName: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
+    // unique: true,
   },
 }, {
   tableName: 'machines',

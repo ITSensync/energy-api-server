@@ -1,6 +1,7 @@
 const { where, fn, col, Op } = require("sequelize");
 const { RuntimeMachine, Machine } = require("../models");
 const { broadcast } = require("../websocket/socketManager");
+const { broadcastRuntimeStats } = require("./broardcastService");
 
 const getWibDate = (date) => {
   const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -46,7 +47,7 @@ const parseTimeToSeconds = (timeValue) => {
 
 exports.createRuntime = async (payload) => {
   try {
-    const { machineId } = payload;
+    const { machineId, date, startTime } = payload;
 
     if (!machineId) {
       return {
@@ -66,12 +67,10 @@ exports.createRuntime = async (payload) => {
       };
     }
 
-    const now = new Date();
-    const runtimeDate = getWibDate(now);
     const runtime = await RuntimeMachine.create({
       machineId: machine.groupName,
-      date: runtimeDate,
-      startTime: getWibTime(now),
+      date: date,
+      startTime: startTime,
     });
 
     return {
@@ -91,7 +90,7 @@ exports.createRuntime = async (payload) => {
 
 exports.updateRuntime = async (payload) => {
   try {
-    const { machineId } = payload;
+    const { machineId, endTime, total } = payload;
 
     if (!machineId) {
       return {
@@ -123,17 +122,20 @@ exports.updateRuntime = async (payload) => {
       };
     }
 
-    const now = new Date();
-    const endTime = getWibTime(now);
-    const startSeconds = parseTimeToSeconds(runtime.startTime);
-    const endSeconds = parseTimeToSeconds(endTime);
-    const durationSeconds = Math.max(endSeconds - startSeconds, 0);
-    const total = Math.round(durationSeconds / 60);
-
     const updatedRuntime = await runtime.update({
       stopTime: endTime,
       total,
     });
+
+    const runtimeStats = await this.statsRuntime({ machineId })
+
+    if (runtimeStats.status === 200) {
+      broadcast({
+        type: 'runtime-stats',
+        machineId,
+        data: runtimeStats.data
+      })
+    }
 
     return {
       status: 200,

@@ -48,11 +48,11 @@ exports.checkRecords = async () => {
 
       await createLog(machineId, message);
 
-      if (targetStatus === 'running') {
+      /* if (targetStatus === 'running') {
         await inputStartTime(machineId);
       } else {
         await updateRuntime(machineId);
-      }
+      } */
     }
 
     const statusMachineNow = await machineStatusService.fetchStatus({ machineId });
@@ -100,23 +100,23 @@ async function createLog(machineId, message) {
 
 }
 
-async function inputStartTime(machineId) {
-  const resultInputTime = await runtimeService.createRuntime({ machineId })
-  if (resultInputTime.status !== 200) {
-    throw new Error(resultInputTime.message);
-  }
-}
+// async function inputStartTime(machineId) {
+//   const resultInputTime = await runtimeService.createRuntime({ machineId })
+//   if (resultInputTime.status !== 200) {
+//     throw new Error(resultInputTime.message);
+//   }
+// }
 
-async function updateRuntime(machineId) {
-  const resultUpdate = await runtimeService.updateRuntime({ machineId });
-  if (resultUpdate.status !== 200) {
-    throw new Error(resultUpdate.message);
-  }
+// async function updateRuntime(machineId) {
+//   const resultUpdate = await runtimeService.updateRuntime({ machineId });
+//   if (resultUpdate.status !== 200) {
+//     throw new Error(resultUpdate.message);
+//   }
 
-  /* BROADCAST CALL */
-  await broadcastRuntimeStats(machineId);
+//   /* BROADCAST CALL */
+//   await broadcastRuntimeStats(machineId);
 
-}
+// }
 
 async function calculateAvgRecordIfNeeded(machineId) {
   const now = new Date();
