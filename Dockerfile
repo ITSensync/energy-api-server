@@ -5,8 +5,11 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
 
-COPY app ./app
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-EXPOSE 8001
-EXPOSE 8002
-CMD ["node", "app/index.js"]
+COPY . .
+
+EXPOSE 3008
+EXPOSE 8080
+CMD ["npm", "start"]
