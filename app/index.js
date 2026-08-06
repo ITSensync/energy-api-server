@@ -1,9 +1,11 @@
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const cron = require('node-cron');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const { sequelize, initializeDummyData } = require('./models');
 const recordsRouter = require('./routes/records');
 const activityLogsRouter = require('./routes/activityLogs');
