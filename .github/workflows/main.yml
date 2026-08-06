@@ -34,6 +34,7 @@ jobs:
             docker run -d \
               --name api-energy \
               -p 3008:3008 \
+              -p 8080:8080 \
               --restart always \
               --add-host=host.docker.internal:host-gateway \
               -e TZ=Asia/Jakarta \
