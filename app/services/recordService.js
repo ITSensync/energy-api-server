@@ -52,7 +52,7 @@ const parseDateFilter = (req) => {
 const getTodayRange = () => {
   const end = new Date();
   const start = new Date(end);
-  start.setMinutes(start.getMinutes() - 2);
+  start.setMinutes(start.getMinutes() - 30);
 
   return { start, end };
 };
