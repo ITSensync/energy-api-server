@@ -95,8 +95,8 @@ async function createLog(machineId, message) {
     throw new Error(resultInput.message);
   }
 
-  /* BROADCAST CALL */
-  await broadcastActivityLogs(machineId);
+  // /* BROADCAST CALL */
+  // await broadcastActivityLogs(machineId);
 
 }
 

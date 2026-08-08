@@ -18,6 +18,17 @@ exports.createActivityLog = async (payload) => {
 
     const data = ActivityLog.create({ machineId, time, message });
 
+    /* BROADCAST CALL */
+    const listActivityLogs = await this.fetchActivityLogs({ machineId, limit: 10 });
+
+    if (listActivityLogs.status === 200) {
+      broadcast({
+        type: 'activity-logs',
+        machineId,
+        data: listActivityLogs.data
+      })
+    }
+
     return {
       status: 200,
       message: "Successfull create activity logs",
