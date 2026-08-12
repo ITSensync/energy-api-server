@@ -11,7 +11,7 @@ const getTodayRange = () => {
 
 exports.create = async (payload) => {
   try {
-    const { flow, total_flow } = payload;
+    const { flow, totalFlow } = payload;
 
     const machine = await Machine.findOne({ where: { groupName: 'mtamixer' } });
     if (!machine) {
@@ -21,7 +21,7 @@ exports.create = async (payload) => {
     const data = await GasRecord.create({
       machineId: 'mtamixer',
       flow,
-      total_flow
+      total_flow: totalFlow,
     });
     
     // BROADCAST GAS RECORDS
