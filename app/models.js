@@ -340,6 +340,7 @@ module.exports = {
   sequelize,
   Machine,
   EnergyRecord,
+  GasRecord,
   ActivityLog,
   AverageRecord,
   StatusMachine,
