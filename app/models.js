@@ -208,7 +208,7 @@ const GasRecord = sequelize.define('GasRecord', {
     allowNull: true,
   },
   total_flow: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL(10, 3),
     allowNull: true,
   }
 }, {
