@@ -41,10 +41,16 @@ const parseDateFilter = (req) => {
   const start = `${startDay} 00:00:00`;
   const end = `${endDay} 23:59:59`;
 
+  // console.log(startDay);
+  // console.log(endDay);
+
   return {
-    _terminalTime: {
+    /* _terminalTime: {
       [Op.like]: `%${startDay}%`,
       [Op.like]: `%${endDay}%`,
+    }, */
+    _terminalTime: {
+      [Op.between]: [start, end],
     },
   };
 };
