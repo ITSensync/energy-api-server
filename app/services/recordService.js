@@ -163,6 +163,17 @@ exports.createEnergyRecord = async (payload) => {
 exports.fetchEnergyRecords = async (options) => {
   try {
     const { limit } = options;
+
+    const dateFilter = {};
+    const column = ['*', '_terminalTime'];
+    let sort = 'DESC';
+
+    if (options.query) {
+      dateFilter._terminalTime = { [Op.between]: [options.query.startDate, options.query.endDate] };
+      column[0] = options.query.parameter
+      sort = 'ASC'
+    }
+
     // const include = [];
 
     /* if (options.query.includeActivityLogs === 'true') {
@@ -174,10 +185,12 @@ exports.fetchEnergyRecords = async (options) => {
     } */
 
     const records = await EnergyRecord.findAll({
+      attributes: column,
       limit,
       // offset,
-      order: [['createdAt', 'DESC']],
+      order: [['createdAt', sort]],
       // include,
+      where: dateFilter,
     });
 
     return {
