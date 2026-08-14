@@ -43,7 +43,7 @@ mainWebSocket({ port: ws_port })
 const start = async () => {
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     await initializeDummyData();
     app.listen(port, '0.0.0.0', () => {
       console.log(`DB service is running on port ${port}`);

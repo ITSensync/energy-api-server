@@ -257,7 +257,7 @@ exports.fetchPaginatedEnergyRecords = async (req) => {
       where: dateFilter,
       limit,
       offset,
-      order: [['createdAt', 'DESC']],
+      order: [['_terminalTime', 'DESC']],
       raw: true,
     });
 
