@@ -188,7 +188,7 @@ exports.fetchEnergyRecords = async (options) => {
       attributes: column,
       limit,
       // offset,
-      order: [['createdAt', sort]],
+      order: [['_terminalTime', sort]],
       // include,
       where: dateFilter,
     });
