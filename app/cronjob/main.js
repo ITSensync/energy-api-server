@@ -10,19 +10,21 @@ let lastNotUpdateBroadcast = 0;
 exports.checkRecords = async () => {
   try {
     const machineId = 'mtamixer';
-    const lastRecordsResponse = await recordService.fetchEnergyRecords({ limit: 1 });
+    const lastRecordsResponse = await recordService.fetchTodayRecords({ machineId: 'mtamixer', });
 
     /* check last data not null */
     if (lastRecordsResponse.status !== 200 || !lastRecordsResponse.data?.length) {
       throw new Error('Last data not found');
     }
 
+    const length = lastRecordsResponse.data.length
+    const latestRecord = lastRecordsResponse.data[length - 1];
+    
     // check not update
     const FIVE_MINUTES = 5 * 60 * 1000;
     const BROADCAST_INTERVAL = 2 * 60 * 1000;
-
-
-    const lastDataTime = new Date(lastRecordsResponse.data[0].createdAt);
+    
+    const lastDataTime = new Date(latestRecord.createdAt);
     const diffTime = Date.now() - lastDataTime.getTime();
 
     if (diffTime >= FIVE_MINUTES) {
@@ -35,8 +37,6 @@ exports.checkRecords = async () => {
 
       return;
     }
-
-    const latestRecord = lastRecordsResponse.data[0];
 
     const targetStatus = latestRecord.getaran > 20 ? 'running' : 'stopped';
     const statusChanged = await updateStatusMachine(machineId, targetStatus);
