@@ -37,7 +37,7 @@ const KwhRecord = sequelize.define('KwhRecord', {
     allowNull: false,
   },
   lastTopupKwh: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
   lastTopupEpoch: {
