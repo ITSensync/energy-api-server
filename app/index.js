@@ -13,6 +13,7 @@ const averageRouter = require('./routes/average');
 const machineStatusRouter = require('./routes/status');
 const runtimeRouter = require('./routes/runtime');
 const gasRouters = require('./routes/gasRecords');
+const kwhRouters = require('./routes/kwh');
 const job = require('./cronjob/main');
 const { createDummyEnergyRecord } = require('./cronjob/dummyEnergyRecords');
 const { mainWebSocket } = require('./websocket/main');
@@ -30,6 +31,7 @@ app.use('/average', averageRouter);
 app.use('/status', machineStatusRouter)
 app.use('/runtime', runtimeRouter)
 app.use('/gas-records', gasRouters);
+app.use('/kwh', kwhRouters);
 // app.use('/machine-status', machineStatusRouter);
 
 app.get('/', (req, res) => {

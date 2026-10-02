@@ -6,6 +6,65 @@ const sequelize = new Sequelize(databaseUrl, {
   logging: false,
 });
 
+const KwhRecord = sequelize.define('KwhRecord', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  deviceId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  timestamp: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+  },
+  datetime: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  tokenKwh: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  tokenPulses: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  totalUsedKwh: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  lastTopupKwh: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  lastTopupEpoch: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+  },
+  power: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  rssi: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  uptime: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  sensorFault: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+}, {
+  tableName: 'kwh_records',
+  timestamps: false,
+})
+
 const EnergyRecord = sequelize.define('EnergyRecord', {
   id: {
     type: DataTypes.INTEGER,
@@ -338,6 +397,7 @@ const initializeDummyData = async () => {
 
 module.exports = {
   sequelize,
+  KwhRecord,
   Machine,
   EnergyRecord,
   GasRecord,

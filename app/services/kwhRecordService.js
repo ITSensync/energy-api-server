@@ -1,0 +1,53 @@
+const { KwhRecord } = require("../models");
+
+exports.createKwhRecord = async (payload) => {
+  try {
+    const { device_id } = payload;
+    if (!device_id) {
+      throw { status: 400, message: 'Device ID cannot be null!' };
+    }
+
+    // {
+    //   "device_id": "kwh-rumah-01",
+    //     "timestamp": 1790838333,
+    //       "datetime": "01-10-2026 14:05:33",
+    //         "token_kwh": 38420,
+    //           "token_pulses": 38420,
+    //             "total_used_kwh": 112305,
+    //               "last_topup_kwh": 50.00,
+    //                 "last_topup_epoch": 1790598612,
+    //                   "power_w": 412,
+    //                     "rssi": -61,
+    //                       "uptime_s": 86400,
+    //                         "sensor_fault": false
+    // }
+    const kwhRecord = await KwhRecord.create({
+      deviceId: device_id,
+      timestamp: payload.timestamp,
+      datetime: payload.datetime,
+      tokenKwh: payload.token_kwh,
+      tokenPulses: payload.token_pulses,
+      totalUsedKwh: payload.total_used_kwh,
+      lastTopupKwh: payload.last_topup_kwh,
+      lastTopupEpoch: payload.last_topup_epoch,
+      power: payload.power_w,
+      rssi: payload.rssi,
+      uptime: payload.uptime_s,
+      sensorFault: payload.sensor_fault,
+    });
+
+
+    return {
+      status: 200,
+      message: 'Success Create Record',
+      data: kwhRecord,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: error.status || 500,
+      message: error.message || 'Error creating energy record(s)',
+      error,
+    };
+  }
+};
