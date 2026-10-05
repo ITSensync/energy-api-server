@@ -95,7 +95,7 @@ exports.getTopupRecords = async (query) => {
       },
     };
 
-    const topupRecords = await TopupRecord.findAll({ where: topupQuery.where, limit: topupQuery.limit });
+    const topupRecords = await TopupRecord.findAll({ where: topupQuery.where, limit: topupQuery.limit, order: [['createdAt', 'DESC']] });
 
     return {
       status: 200,

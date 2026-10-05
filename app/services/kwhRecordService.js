@@ -84,7 +84,7 @@ exports.getKwhRecord = async (query) => {
       },
     };
 
-    const kwhRecords = await KwhRecord.findAll({ where: kwhQuery.where, limit: kwhQuery.limit });
+    const kwhRecords = await KwhRecord.findAll({ where: kwhQuery.where, limit: kwhQuery.limit, order: [['datetime', 'DESC']] });
 
     return {
       status: 200,
