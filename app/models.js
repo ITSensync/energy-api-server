@@ -25,7 +25,7 @@ const KwhRecord = sequelize.define('KwhRecord', {
     allowNull: false,
   },
   tokenKwh: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL(10, 3),
     allowNull: false,
   },
   tokenPulses: {
@@ -33,7 +33,7 @@ const KwhRecord = sequelize.define('KwhRecord', {
     allowNull: false,
   },
   usedKwhSinceTopup: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL(10, 3),
     allowNull: false,
   },
   power: {
