@@ -34,8 +34,6 @@ exports.createKwhRecord = async (payload) => {
       tokenKwh: payload.token_kwh,
       tokenPulses: payload.token_pulses,
       usedKwhSinceTopup: payload.used_since_topup_kwh,
-      lastTopupKwh: payload.last_topup_kwh,
-      lastTopupEpoch: payload.last_topup_epoch,
       power: payload.power_w,
       rssi: payload.rssi,
       uptime: payload.uptime_s,
