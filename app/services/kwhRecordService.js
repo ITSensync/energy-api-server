@@ -27,14 +27,13 @@ exports.createKwhRecord = async (payload) => {
     //                       "uptime_s": 86400,
     //                         "sensor_fault": false
     // }
-    console.log(payload);
     const kwhRecord = await KwhRecord.create({
       deviceId: device_id,
       timestamp: payload.timestamp,
       datetime: payload.datetime,
       tokenKwh: payload.token_kwh,
       tokenPulses: payload.token_pulses,
-      usedKwhSinceTopup: payload.used_since_topup_kwh,
+      usedKwhSinceTopup: payload.total_used_kwh,
       power: payload.power_w,
       rssi: payload.rssi,
       uptime: payload.uptime_s,
