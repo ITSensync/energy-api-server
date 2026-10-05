@@ -1,4 +1,10 @@
+const { Op } = require("sequelize");
 const { KwhRecord } = require("../models");
+
+const formatDateTime = (value) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})(.*)$/.exec(value);
+  return match ? `${match[3]}-${match[2]}-${match[1]}${match[4]}` : value;
+};
 
 exports.createKwhRecord = async (payload) => {
   try {
@@ -27,7 +33,7 @@ exports.createKwhRecord = async (payload) => {
       datetime: payload.datetime,
       tokenKwh: payload.token_kwh,
       tokenPulses: payload.token_pulses,
-      totalUsedKwh: payload.total_used_kwh,
+      usedKwhSinceTopup: payload.used_since_topup_kwh,
       lastTopupKwh: payload.last_topup_kwh,
       lastTopupEpoch: payload.last_topup_epoch,
       power: payload.power_w,
@@ -41,6 +47,51 @@ exports.createKwhRecord = async (payload) => {
       status: 200,
       message: 'Success Create Record',
       data: kwhRecord,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: error.status || 500,
+      message: error.message || 'Error creating energy record(s)',
+      error,
+    };
+  }
+};
+
+exports.getKwhRecord = async (query) => {
+  try {
+    const { device_id } = query;
+
+    const kwhQuery = {};
+
+    if (!device_id) {
+      throw { status: 400, message: 'Device ID cannot be null!' };
+    }
+
+    kwhQuery.where = {
+      ...kwhQuery.where,
+      deviceId: device_id,
+    }
+
+    if (query.limit) {
+      kwhQuery.limit = parseInt(query.limit);
+    }
+
+    const start = formatDateTime(query.startDate || new Date().toISOString().slice(0, 10) + ' 00:00:00');
+    const end = formatDateTime(query.endDate || new Date().toISOString().slice(0, 10) + ' 23:59:59');
+    kwhQuery.where = {
+      ...kwhQuery.where,
+      datetime: {
+        [Op.between]: [start, end],
+      },
+    };
+
+    const kwhRecords = await KwhRecord.findAll({ where: kwhQuery.where, limit: kwhQuery.limit });
+
+    return {
+      status: 200,
+      message: 'Success Create Record',
+      data: kwhRecords,
     };
   } catch (error) {
     console.error(error);

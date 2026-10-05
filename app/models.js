@@ -32,16 +32,8 @@ const KwhRecord = sequelize.define('KwhRecord', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  totalUsedKwh: {
+  usedKwhSinceTopup: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  lastTopupKwh: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false,
-  },
-  lastTopupEpoch: {
-    type: DataTypes.BIGINT,
     allowNull: false,
   },
   power: {
@@ -63,6 +55,25 @@ const KwhRecord = sequelize.define('KwhRecord', {
 }, {
   tableName: 'kwh_records',
   timestamps: false,
+})
+
+const TopupRecord = sequelize.define('TopupRecord', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  deviceId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  totalTopupKwh: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  }
+}, {
+  tableName: 'topup_records',
+  timestamps: true,
 })
 
 const EnergyRecord = sequelize.define('EnergyRecord', {
@@ -398,6 +409,7 @@ const initializeDummyData = async () => {
 module.exports = {
   sequelize,
   KwhRecord,
+  TopupRecord,
   Machine,
   EnergyRecord,
   GasRecord,
