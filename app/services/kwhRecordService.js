@@ -1,5 +1,7 @@
 const { Op } = require("sequelize");
-const { KwhRecord } = require("../models");
+const { KwhRecord, TopupRecord } = require("../models");
+
+const TOPUP_RESPONSE_WINDOW_MS = 7 * 60 * 1000;
 
 const formatDateTime = (value) => {
   const match = /^(\d{4})-(\d{2})-(\d{2})(.*)$/.exec(value);
@@ -27,7 +29,7 @@ exports.createKwhRecord = async (payload) => {
     //                       "uptime_s": 86400,
     //                         "sensor_fault": false
     // }
-    console.log(payload);
+
     const kwhRecord = await KwhRecord.create({
       deviceId: device_id,
       timestamp: payload.timestamp,
@@ -41,11 +43,24 @@ exports.createKwhRecord = async (payload) => {
       sensorFault: payload.sensor_fault,
     });
 
+    /* GET LATEST TOP UP DATA */
+    const latestTopup = await TopupRecord.findOne({
+      where: { deviceId: device_id},
+      order: [['createdAt', 'DESC']],
+      raw: true,
+    })
+
+    const now = Date.now();
+    const topupCreatedAt = latestTopup ? new Date(latestTopup.createdAt).getTime() : NaN;
+    const isRecentTopup = Number.isFinite(topupCreatedAt)
+      && topupCreatedAt <= now
+      && now - topupCreatedAt < TOPUP_RESPONSE_WINDOW_MS;
+
 
     return {
       status: 200,
       message: 'Success Create Record',
-      data: kwhRecord,
+      ...(isRecentTopup ? { topup: latestTopup } : {}),
     };
   } catch (error) {
     console.error(error);
