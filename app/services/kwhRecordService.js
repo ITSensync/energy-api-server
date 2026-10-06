@@ -45,7 +45,7 @@ exports.createKwhRecord = async (payload) => {
 
     /* GET LATEST TOP UP DATA */
     const latestTopup = await TopupRecord.findOne({
-      where: { deviceId: device_id},
+      where: { deviceId: device_id },
       order: [['createdAt', 'DESC']],
       raw: true,
     })
@@ -58,9 +58,9 @@ exports.createKwhRecord = async (payload) => {
 
 
     return {
-      status: "ok",
-      message: 'Success Create Record',
-      ...(isRecentTopup ? { topup: latestTopup } : {}),
+      status: 200,
+      message: 'OK',
+      ...(isRecentTopup ? { topup: { id: latestTopup.id, device_id: latestTopup.deviceId, totalTopupKwh: latestTopup.totalTopupKwh } } : {}),
     };
   } catch (error) {
     console.error(error);
