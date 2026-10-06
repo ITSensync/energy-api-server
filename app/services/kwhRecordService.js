@@ -58,8 +58,8 @@ exports.createKwhRecord = async (payload) => {
 
 
     return {
-      status: 200,
-      message: 'OK',
+      status: "ok",
+      message: 'Success Create Record',
       ...(isRecentTopup ? { topup: { id: latestTopup.id, device_id: latestTopup.deviceId, totalTopupKwh: latestTopup.totalTopupKwh } } : {}),
     };
   } catch (error) {
