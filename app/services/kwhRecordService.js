@@ -58,7 +58,7 @@ exports.createKwhRecord = async (payload) => {
 
 
     return {
-      status: 200,
+      status: "ok",
       message: 'Success Create Record',
       ...(isRecentTopup ? { topup: latestTopup } : {}),
     };
