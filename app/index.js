@@ -64,6 +64,16 @@ cron.schedule('15 */2 * * * *', async () => {
   await job.checkRecords();
 });
 
+cron.schedule('*/15 * * * *', async () => {
+  console.log("==== START SEND EMAIL =====");
+  await job.sendAlertEmail();
+  console.log("==== FINISH SEND EMAIL =====");
+});
+
+/* console.log("==== START SEND EMAIL =====");
+job.sendAlertEmail();
+console.log("==== FINISH SEND EMAIL ====="); */
+
 // Jalankan setiap 3 detik untuk kebutuhan data dummy lokal.
 // cron.schedule('*/3 * * * * *', async () => {
 //   try {
