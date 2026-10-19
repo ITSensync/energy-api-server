@@ -5,7 +5,7 @@ const runtimeService = require('../services/runtimeService');
 const averageRecordService = require('../services/averageRecordService');
 const kwhRecordService = require('../services/kwhRecordService');
 const { broadcastMachineStatus, broadcastRuntimeStats, broadcastActivityLogs, broadcastTodayAverage, broadcastNotUpdateAlert } = require('../services/broardcastService');
-const { default: nodemailer } = require('nodemailer');
+const axios = require('axios');
 
 let lastNotUpdateBroadcast = 0;
 let lastLowTokenAlertThreshold = null;
@@ -134,25 +134,30 @@ exports.sendAlertEmail = async () => {
         `Status sensor: ${sensorStatus}`,
       ].join('\n');
 
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT || 465),
-        secure: Number(process.env.SMTP_PORT || 465) === 465,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
+      const apiKey = process.env.BREVO_API_KEY;
+      const senderEmail = process.env.BREVO_SENDER_EMAIL;
+      if (!apiKey || !senderEmail) {
+        throw new Error('BREVO_API_KEY and BREVO_SENDER_EMAIL must be configured');
+      }
 
-      const info = await transporter.sendMail({
-        from: {
-          name: 'KWH Dashboard Monitoring',
-          address: process.env.SMTP_FROM || process.env.SMTP_USER,
+      const recipients = (process.env.ALERT_EMAIL_TO || 'aliefmabdillah09@gmail.com, sensyncproject@gmail.com')
+        .split(',')
+        .map((email) => email.trim())
+        .filter(Boolean)
+        .map((email) => ({ email }));
+      if (recipients.length === 0) {
+        throw new Error('At least one alert email recipient must be configured');
+      }
+
+      const response = await axios.post('https://api.brevo.com/v3/smtp/email', {
+        sender: {
+          name: process.env.BREVO_SENDER_NAME || 'KWH Dashboard Monitoring',
+          email: senderEmail,
         },
-        to: process.env.ALERT_EMAIL_TO || 'aliefmabdillah09@gmail.com, sensyncproject@gmail.com',
+        to: recipients,
         subject,
-        text,
-        html: `
+        textContent: text,
+        htmlContent: `
           <!doctype html>
           <html lang="id">
             <head>
@@ -186,18 +191,19 @@ exports.sendAlertEmail = async () => {
             </body>
           </html>
         `,
+      }, {
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000,
       });
 
-      console.log("Message sent: %s", info.messageId);
+      console.log('Message sent via Brevo: %s', response.data?.messageId || 'accepted');
       lastLowTokenAlertThreshold = alertThresholdKwh;
     }
-
-    // // Get the Ethereal URL to preview this email
-    // const previewUrl = nodemailer.getTestMessageUrl(info);
-    // console.log("Preview URL: %s", previewUrl);
-
   } catch (error) {
-    console.error(error);
+    console.error('Failed to send alert email:', error?.response?.data || error?.message || error);
   }
 }
 
