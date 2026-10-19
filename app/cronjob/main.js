@@ -8,6 +8,7 @@ const { broadcastMachineStatus, broadcastRuntimeStats, broadcastActivityLogs, br
 const { default: nodemailer } = require('nodemailer');
 
 let lastNotUpdateBroadcast = 0;
+let lastLowTokenAlertThreshold = null;
 
 exports.checkRecords = async () => {
   try {
@@ -76,10 +77,25 @@ exports.sendAlertEmail = async () => {
     }
 
     const latestKwhRecord = latestData.data[0];
-    const LOW_TOKEN_THRESHOLD_KWH = 10;
-    const remainingTokenKwh = Number(latestKwhRecord.tokenKwh);
+    const rawTokenKwh = latestKwhRecord.tokenKwh;
+    const remainingTokenKwh = Number(rawTokenKwh);
 
-    if (Number.isFinite(remainingTokenKwh) && remainingTokenKwh >= LOW_TOKEN_THRESHOLD_KWH) {
+    if (rawTokenKwh === null || rawTokenKwh === undefined || rawTokenKwh === '' || !Number.isFinite(remainingTokenKwh)) {
+      throw new Error('latest token value is not a valid number');
+    }
+
+    if (remainingTokenKwh > 15) {
+      lastLowTokenAlertThreshold = null;
+      return;
+    }
+
+    const alertThresholdKwh = remainingTokenKwh <= 5
+      ? 5
+      : remainingTokenKwh <= 10
+        ? 10
+        : 15;
+
+    if (lastLowTokenAlertThreshold === null || alertThresholdKwh < lastLowTokenAlertThreshold) {
       const formatNumber = (value, maximumFractionDigits = 2) => {
         if (value === null || value === undefined || value === '') {
           return '-';
@@ -104,11 +120,11 @@ exports.sendAlertEmail = async () => {
       const sensorFault = [true, 1, '1', 'true'].includes(latestKwhRecord.sensorFault);
       const sensorStatus = sensorFault ? 'Periksa sensor' : 'Normal';
       const safeRecordedAt = escapeHtml(recordedAt);
-      const subject = `Peringatan: sisa token listrik ${tokenKwh} kWh - Rumah`;
+      const subject = `Peringatan level ${alertThresholdKwh} kWh: sisa token listrik ${tokenKwh} kWh - Rumah`;
       const text = [
-        'PERINGATAN: TOKEN LISTRIK MENIPIS',
+        `PERINGATAN: TOKEN LISTRIK MENCAPAI LEVEL ${alertThresholdKwh} KWH`,
         '',
-        `Sisa token listrik Rumah saat ini ${tokenKwh} kWh (ambang peringatan: ${LOW_TOKEN_THRESHOLD_KWH} kWh).`,
+        `Sisa token listrik Rumah saat ini ${tokenKwh} kWh (ambang peringatan level ini: ${alertThresholdKwh} kWh).`,
         '',
         'Segera lakukan isi ulang token untuk menghindari listrik terputus.',
         '',
@@ -133,7 +149,7 @@ exports.sendAlertEmail = async () => {
           name: 'KWH Dashboard Monitoring',
           address: process.env.SMTP_FROM || process.env.SMTP_USER,
         },
-        to: process.env.ALERT_EMAIL_TO || 'aliefmabdillah09@gmail.com',
+        to: process.env.ALERT_EMAIL_TO || 'aliefmabdillah09@gmail.com, sensyncproject@gmail.com',
         subject,
         text,
         html: `
@@ -154,11 +170,11 @@ exports.sendAlertEmail = async () => {
                 </tr>
                 <tr>
                   <td style="padding:24px 28px;">
-                    <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Sisa token listrik terdeteksi <strong style="color: #c50c0c;">${tokenKwh} kWh</strong>, sudah mencapai ambang peringatan ${LOW_TOKEN_THRESHOLD_KWH} kWh.</p>
+                    <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Sisa token listrik terdeteksi <strong style="color: #c50c0c;">${tokenKwh} kWh</strong>, sudah mencapai level peringatan ${alertThresholdKwh} kWh.</p>
                     <p style="margin:0 0 20px;padding:14px 16px;background: #fff7ed;border-left:4px solid #f59e0b;font-size:14px;line-height:1.6;"><strong>Tindakan:</strong> Segera isi ulang token agar pasokan listrik tidak terputus.</p>
                     <p style="margin:0 0 12px;font-size:13px;color:#6b7280;">Detail pembacaan terakhir (${safeRecordedAt})</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;">
-                      <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Ambang peringatan</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${LOW_TOKEN_THRESHOLD_KWH} kWh</td></tr>
+                      <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Level ambang peringatan</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${alertThresholdKwh} kWh</td></tr>
                       <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Pemakaian sejak isi ulang</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${usedKwh} kWh</td></tr>
                       <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Daya saat ini</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${power} W</td></tr>
                       <tr><td style="padding:11px 0;color:#6b7280;">Status sensor</td><td style="padding:11px 0;text-align:right;font-weight:bold;color:${sensorFault ? '#b91c1c' : '#15803d'};">${sensorStatus}</td></tr>
@@ -173,6 +189,7 @@ exports.sendAlertEmail = async () => {
       });
 
       console.log("Message sent: %s", info.messageId);
+      lastLowTokenAlertThreshold = alertThresholdKwh;
     }
 
     // // Get the Ethereal URL to preview this email
