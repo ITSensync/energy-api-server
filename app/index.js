@@ -64,7 +64,7 @@ cron.schedule('15 */2 * * * *', async () => {
   await job.checkRecords();
 });
 
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('*/30 * * * *', async () => {
   console.log("==== START SEND EMAIL =====");
   await job.sendAlertEmail();
   console.log("==== FINISH SEND EMAIL =====");
