@@ -140,7 +140,7 @@ exports.sendAlertEmail = async () => {
         throw new Error('BREVO_API_KEY and BREVO_SENDER_EMAIL must be configured');
       }
 
-      const recipients = (process.env.ALERT_EMAIL_TO || 'aliefmabdillah09@gmail.com, sensyncproject@gmail.com')
+      const recipients = (process.env.ALERT_EMAIL_TO || 'aliefmabdillah09@gmail.com, sensyncproject@gmail.com, faisalmukti88@gmail.com')
         .split(',')
         .map((email) => email.trim())
         .filter(Boolean)
