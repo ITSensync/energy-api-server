@@ -8,7 +8,6 @@ const { broadcastMachineStatus, broadcastRuntimeStats, broadcastActivityLogs, br
 const axios = require('axios');
 
 let lastNotUpdateBroadcast = 0;
-let lastLowTokenAlertThreshold = null;
 
 exports.checkRecords = async () => {
   try {
@@ -84,18 +83,7 @@ exports.sendAlertEmail = async () => {
       throw new Error('latest token value is not a valid number');
     }
 
-    if (remainingTokenKwh > 15) {
-      lastLowTokenAlertThreshold = null;
-      return;
-    }
-
-    const alertThresholdKwh = remainingTokenKwh <= 5
-      ? 5
-      : remainingTokenKwh <= 10
-        ? 10
-        : 15;
-
-    if (lastLowTokenAlertThreshold === null || alertThresholdKwh < lastLowTokenAlertThreshold) {
+    if (remainingTokenKwh < 10) {
       const formatNumber = (value, maximumFractionDigits = 2) => {
         if (value === null || value === undefined || value === '') {
           return '-';
@@ -175,11 +163,11 @@ exports.sendAlertEmail = async () => {
                 </tr>
                 <tr>
                   <td style="padding:24px 28px;">
-                    <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Sisa token listrik terdeteksi <strong style="color: #c50c0c;">${tokenKwh} kWh</strong>, sudah mencapai level peringatan ${alertThresholdKwh} kWh.</p>
+                    <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Sisa token listrik terdeteksi <strong style="color: #c50c0c;">${tokenKwh} kWh</strong>, sudah mencapai level peringatan dibawah 10 kWh.</p>
                     <p style="margin:0 0 20px;padding:14px 16px;background: #fff7ed;border-left:4px solid #f59e0b;font-size:14px;line-height:1.6;"><strong>Tindakan:</strong> Segera isi ulang token agar pasokan listrik tidak terputus.</p>
                     <p style="margin:0 0 12px;font-size:13px;color:#6b7280;">Detail pembacaan terakhir (${safeRecordedAt})</p>
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;">
-                      <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Level ambang peringatan</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${alertThresholdKwh} kWh</td></tr>
+                      <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Level ambang peringatan</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">10 kWh</td></tr>
                       <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Pemakaian sejak isi ulang</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${usedKwh} kWh</td></tr>
                       <tr><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">Daya saat ini</td><td style="padding:11px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${power} W</td></tr>
                       <tr><td style="padding:11px 0;color:#6b7280;">Status sensor</td><td style="padding:11px 0;text-align:right;font-weight:bold;color:${sensorFault ? '#b91c1c' : '#15803d'};">${sensorStatus}</td></tr>
@@ -201,6 +189,8 @@ exports.sendAlertEmail = async () => {
 
       console.log('Message sent via Brevo: %s', response.data?.messageId || 'accepted');
       lastLowTokenAlertThreshold = alertThresholdKwh;
+    } else {
+      console.log("No Email Send");
     }
   } catch (error) {
     console.error('Failed to send alert email:', error?.response?.data || error?.message || error);
