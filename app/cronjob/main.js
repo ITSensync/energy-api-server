@@ -108,11 +108,11 @@ exports.sendAlertEmail = async () => {
       const sensorFault = [true, 1, '1', 'true'].includes(latestKwhRecord.sensorFault);
       const sensorStatus = sensorFault ? 'Periksa sensor' : 'Normal';
       const safeRecordedAt = escapeHtml(recordedAt);
-      const subject = `Peringatan level ${alertThresholdKwh} kWh: sisa token listrik ${tokenKwh} kWh - Rumah`;
+      const subject = `Peringatan dibawah 10 kWh: sisa token listrik ${tokenKwh} kWh - Rumah`;
       const text = [
-        `PERINGATAN: TOKEN LISTRIK MENCAPAI LEVEL ${alertThresholdKwh} KWH`,
+        `PERINGATAN: TOKEN LISTRIK MENCAPAI DIBAWAH 10 KWH`,
         '',
-        `Sisa token listrik Rumah saat ini ${tokenKwh} kWh (ambang peringatan level ini: ${alertThresholdKwh} kWh).`,
+        `Sisa token listrik Rumah saat ini ${tokenKwh} kWh (ambang peringatan level ini: 10 kWh).`,
         '',
         'Segera lakukan isi ulang token untuk menghindari listrik terputus.',
         '',
@@ -188,7 +188,6 @@ exports.sendAlertEmail = async () => {
       });
 
       console.log('Message sent via Brevo: %s', response.data?.messageId || 'accepted');
-      lastLowTokenAlertThreshold = alertThresholdKwh;
     } else {
       console.log("No Email Send");
     }
